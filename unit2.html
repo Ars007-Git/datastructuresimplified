@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacks and Queues: An Interactive Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .brand-text-teal { color: #00A6A6; }
+        .brand-bg-teal { background-color: #00A6A6; }
+        .brand-text-red { color: #EF5B5B; }
+        .brand-bg-red { background-color: #EF5B5B; }
+        .brand-text-yellow { color: #F7B538; }
+        .brand-bg-yellow { background-color: #F7B538; }
+        .brand-text-dark { color: #2F4858; }
+        .brand-bg-dark { background-color: #2F4858; }
+        .brand-bg-light-teal { background-color: #75C9C8; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .sim-container {
+            min-height: 350px;
+        }
+        .stack-item, .queue-item {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform-origin: bottom;
+        }
+        .code-block {
+            background-color: #2F4858;
+            color: #f0f4f8;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        .recursion-frame {
+            transition: all 0.5s ease-in-out;
+        }
+        .expression-table th, .expression-table td {
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .expression-table thead tr {
+            background-color: #2F4858;
+            color: white;
+        }
+        .expression-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+<nav class="bg-gray-100 shadow" x-data="{ open: false, dropdown: false }">
+  <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Brand -->
+      <a href="#" class="text-xl font-semibold text-gray-800">Data Structures Simplified</a>
+
+      <!-- Toggler Button -->
+      <div class="sm:hidden">
+        <button @click="open = !open" type="button" class="text-gray-700 hover:text-gray-900 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+            <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Menu -->
+      <div class="hidden sm:flex sm:items-center space-x-4">
+        <a href="index.html" class="text-gray-700 hover:text-blue-600">Home</a>
+        <div class="relative" x-data="{ dropdown: false }">
+          <button @click="dropdown = !dropdown" class="text-gray-700 hover:text-blue-600 focus:outline-none">
+            Units ▼
+          </button>
+          <ul x-show="dropdown" @click.away="dropdown = false"
+              class="absolute mt-2 w-40 bg-white border rounded shadow z-50">
+            <li><a href="unit1.html" class="block px-4 py-2 hover:bg-gray-100">Unit 1</a></li>
+            <li><a href="unit2.html" class="block px-4 py-2 hover:bg-gray-100">Unit 2</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div x-show="open" class="sm:hidden mt-2">
+      <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Home</a>
+      <div class="px-4 py-2" x-data="{ dropdown: false }">
+        <button @click="dropdown = !dropdown" class="text-gray-700 hover:text-blue-600 w-full text-left">
+          Units ▼
+        </button>
+        <ul x-show="dropdown" class="mt-1 pl-2">
+          <li><a href="unit1.html" class="block py-1 text-gray-700 hover:bg-gray-100">Unit 1</a></li>
+          <li><a href="unit2.html" class="block py-1 text-gray-700 hover:bg-gray-100">Unit 2</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+    <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-6xl font-black text-energetic-dark-blue mb-">Data Structures: Stacks & Queues</h1>
+        <p class="text-lg md:text-xl text-energetic-teal font-semibold">An interactive guide for Diploma Students.</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="intro" class="mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6 md:p-8">
+                    <h2 class="text-3xl font-bold brand-text-teal mb-4">What are They?</h2>
+                    <p class="text-lg">Stacks and Queues are fundamental <b>linear data structures</b> that organize data sequentially. Their unique rules for adding and removing elements make them powerful tools for solving different kinds of problems, from managing function calls to scheduling tasks.</p>
+                </div>
+                <div class="card p-6 md:p-8 text-center">
+                    <div class="flex justify-around items-center">
+                        <div>
+                            <span class="text-5xl md:text-6xl">📚</span>
+                            <p class="mt-2 font-bold text-xl">Stack: LIFO</p>
+                            <p class="text-sm text-gray-600">Last-In, First-Out</p>
+                        </div>
+                        <div class="text-2xl font-bold brand-text-dark">VS</div>
+                        <div>
+                            <span class="text-5xl md:text-6xl">🎟️</span>
+                            <p class="mt-2 font-bold text-xl">Queue: FIFO</p>
+                            <p class="text-sm text-gray-600">First-In, First-Out</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-gray-300">
+
+        <section id="stack" class="mb-12">
+            <h2 class="text-4xl font-bold text-center mb-8 brand-text-teal">Deep Dive into Stacks (LIFO)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="card p-6 lg:col-span-2">
+                     <h3 class="text-2xl font-bold mb-4 text-center">Interactive Stack Simulation</h3>
+                     <p class="text-center text-gray-600 mb-4">A stack is like a pile of plates. The last plate you put on is the first one you take off.</p>
+                     <div class="sim-container flex flex-col md:flex-row items-center justify-center gap-8 p-4 bg-gray-50 rounded-lg">
+                        <div class="w-full md:w-1/2 flex justify-center items-end h-64 bg-gray-200 p-2 rounded-lg relative">
+                            <div id="stack-visual-container" class="flex flex-col-reverse justify-start w-24 h-full"></div>
+                            <div id="stack-top-pointer" class="absolute left-0 top-full h-8 text-red-500 font-bold transition-all duration-500 flex items-center">
+                                <span class="mr-1">TOP ➔</span>
+                                <span id="stack-top-value">-1</span>
+                            </div>
+                            <div id="stack-message" class="absolute inset-0 bg-opacity-80 text-white text-2xl font-bold flex items-center justify-center rounded-lg opacity-0 transition-opacity pointer-events-none"></div>
+                        </div>
+                        <div class="w-full md:w-1/3 space-y-4">
+                            <input type="number" id="stack-input" class="w-full p-2 border rounded-md" placeholder="Enter a number">
+                            <button id="stack-push-btn" class="w-full brand-bg-teal text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">PUSH</button>
+                            <button id="stack-pop-btn" class="w-full brand-bg-red text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">POP</button>
+                             <div id="stack-popped-value" class="text-center font-semibold mt-2 h-6"></div>
+                        </div>
+                     </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-2">Array Representation & PUSH Operation</h3>
+                    <p class="mb-4">Stacks are often implemented using arrays. A `top` pointer tracks the last element. `PUSH` adds an element to the top.</p>
+                    <div class="code-block">
+                        <pre><code>Algorithm Push(stack, top, maxSize, el):
+  // Check for Stack Overflow
+  if top >= maxSize - 1:
+    print "Stack Overflow"
+    return
+  // Increment top and add element
+  top = top + 1
+  stack[top] = el</code></pre>
+                    </div>
+                </div>
+
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-2">POP Operation</h3>
+                    <p class="mb-4">`POP` removes the top element. It also checks for `Underflow` if the stack is empty.</p>
+                     <div class="code-block">
+                        <pre><code>Algorithm Pop(stack, top):
+  // Check for Stack Underflow
+  if top &lt; 0:
+    print "Stack Underflow"
+    return None
+  // Retrieve element and decrement top
+  element = stack[top]
+  top = top - 1
+  return element</code></pre>
+                    </div>
+                </div>
+
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Common Applications of Stacks</h3>
+                    <div class="chart-container mx-auto">
+                        <canvas id="stack-apps-chart"></canvas>
+                    </div>
+                    <div class="mt-4 text-gray-600">
+                        <p class="mb-2">Stacks are incredibly versatile due to their LIFO nature:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><b>Function Calls (Recursion):</b> Operating systems use a "call stack" to manage function invocations, especially for recursive functions, storing local variables and return addresses.</li>
+                            <li><b>Expression Evaluation:</b> Used in compilers to convert and evaluate arithmetic expressions (e.g., Infix to Postfix conversion).</li>
+                            <li><b>Undo/Redo Operations:</b> Most software uses stacks to implement undo/redo functionality, where each action is pushed onto a stack.</li>
+                            <li><b>Browser History Navigation:</b> When you click the "back" button in a browser, it's popping URLs from a stack.</li>
+                            <li><b>Syntax Parsing:</b> Compilers use stacks to check for balanced parentheses, brackets, and braces in code.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-gray-300">
+
+        <section id="expressions" class="mb-12">
+            <h2 class="text-4xl font-bold text-center mb-8 brand-text-yellow">Expressions: Infix, Prefix, Postfix</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4">Expression Notations</h3>
+                    <p class="mb-4">Expressions can be written in different forms:</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><b>Infix Notation:</b> Operator is between operands (e.g., `A + B`). Human-readable, but requires precedence rules and parentheses.</li>
+                        <li><b>Prefix Notation (Polish Notation):</b> Operator is before operands (e.g., `+ A B`). No parentheses needed, order is clear.</li>
+                        <li><b>Postfix Notation (Reverse Polish Notation - RPN):</b> Operator is after operands (e.g., `A B +`). No parentheses needed, ideal for machine evaluation using a stack.</li>
+                    </ul>
+                    <p class="mt-4 font-semibold">Why Convert? Machines find Postfix/Prefix easier to evaluate as they inherently define the order of operations without ambiguity.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4">Operator Precedence</h3>
+                    <p class="mb-4">Rules for evaluating expressions:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Parentheses `()`:</b> Highest precedence, evaluated first.</li>
+                        <li><b>Exponentiation `^`:</b> Next highest.</li>
+                        <li><b>Multiplication `*`, Division `/`:</b> Equal precedence, left-to-right associativity.</li>
+                        <li><b>Addition `+`, Subtraction `-`:</b> Lowest precedence, equal, left-to-right associativity.</li>
+                    </ul>
+                </div>
+                
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Infix to Postfix Conversion Examples</h3>
+                    <p class="mb-4 text-center text-gray-600">Here are some examples demonstrating the conversion of infix expressions to postfix form using a stack-based approach.</p>
+                    <h4 class="text-xl font-bold mb-2">Example 1: `A + B * C / D – E + F * G + H`</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm expression-table">
+                            <thead>
+                                <tr>
+                                    <th>Scanned Char</th>
+                                    <th>Stack (top to bottom)</th>
+                                    <th>Postfix Expression</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>A</td><td></td><td>A</td></tr>
+                                <tr><td>+</td><td>`+`</td><td>A</td></tr>
+                                <tr><td>B</td><td>`+`</td><td>A B</td></tr>
+                                <tr><td>*</td><td>`*`, `+`</td><td>A B</td></tr>
+                                <tr><td>C</td><td>`*`, `+`</td><td>A B C</td></tr>
+                                <tr><td>/</td><td>`/`, `+`</td><td>A B C `*`</td></tr>
+                                <tr><td>D</td><td>`/`, `+`</td><td>A B C `*` D</td></tr>
+                                <tr><td>–</td><td>`-`</td><td>A B C `*` D `/` `+`</td></tr>
+                                <tr><td>E</td><td>`-`</td><td>A B C `*` D `/` `+` E</td></tr>
+                                <tr><td>+</td><td>`+`</td><td>A B C `*` D `/` `+` E `-`</td></tr>
+                                <tr><td>F</td><td>`+`</td><td>A B C `*` D `/` `+` E `-` F</td></tr>
+                                <tr><td>*</td><td>`*`, `+`</td><td>A B C `*` D `/` `+` E `-` F</td></tr>
+                                <tr><td>G</td><td>`*`, `+`</td><td>A B C `*` D `/` `+` E `-` F G</td></tr>
+                                <tr><td>+</td><td>`+`, `+`</td><td>A B C `*` D `/` `+` E `-` F G `*`</td></tr>
+                                <tr><td>H</td><td>`+`, `+`</td><td>A B C `*` D `/` `+` E `-` F G `*` H</td></tr>
+                                <tr><td>End</td><td></td><td>A B C `*` D `/` `+` E `-` F G `*` H `+` `+`</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-center font-bold">Final Postfix: `A B C * D / + E - F G * H + +`</p>
+
+                    <h4 class="text-xl font-bold mb-2 mt-8">Example 2: `a+b-c/d*e`</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm expression-table">
+                            <thead>
+                                <tr>
+                                    <th>Scanned Char</th>
+                                    <th>Stack</th>
+                                    <th>Postfix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>a</td><td></td><td>a</td></tr>
+                                <tr><td>+</td><td>`+`</td><td>a</td></tr>
+                                <tr><td>b</td><td>`+`</td><td>a b</td></tr>
+                                <tr><td>-</td><td>`-`</td><td>a b `+`</td></tr>
+                                <tr><td>c</td><td>`-`</td><td>a b `+` c</td></tr>
+                                <tr><td>/</td><td>`/`, `-`</td><td>a b `+` c</td></tr>
+                                <tr><td>d</td><td>`/`, `-`</td><td>a b `+` c d</td></tr>
+                                <tr><td>*</td><td>`*`, `-`</td><td>a b `+` c d `/`</td></tr>
+                                <tr><td>e</td><td>`*`, `-`</td><td>a b `+` c d `/` e</td></tr>
+                                <tr><td>End</td><td></td><td>a b `+` c d `/` e `*` `-`</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-center font-bold">Final Postfix: `a b + c d / e * -`</p>
+
+                    <h4 class="text-xl font-bold mb-2 mt-8">Example 3: `(m+n)/(x-y)+z`</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm expression-table">
+                            <thead>
+                                <tr>
+                                    <th>Scanned Char</th>
+                                    <th>Stack</th>
+                                    <th>Postfix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>(</td><td>`(`</td><td></td></tr>
+                                <tr><td>m</td><td>`(`</td><td>m</td></tr>
+                                <tr><td>+</td><td>`+`, `(`</td><td>m</td></tr>
+                                <tr><td>n</td><td>`+`, `(`</td><td>m n</td></tr>
+                                <tr><td>)</td><td></td><td>m n `+`</td></tr>
+                                <tr><td>/</td><td>`/`</td><td>m n `+`</td></tr>
+                                <tr><td>(</td><td>`(` ` /`</td><td>m n `+`</td></tr>
+                                <tr><td>x</td><td>`(` ` /`</td><td>m n `+` x</td></tr>
+                                <tr><td>-</td><td>`-` `(` ` /`</td><td>m n `+` x</td></tr>
+                                <tr><td>y</td><td>`-` `(` ` /`</td><td>m n `+` x y</td></tr>
+                                <tr><td>)</td><td>`/`</td><td>m n `+` x y `-`</td></tr>
+                                <tr><td>+</td><td>`+`</td><td>m n `+` x y `-` `/`</td></tr>
+                                <tr><td>z</td><td>`+`</td><td>m n `+` x y `-` `/` z</td></tr>
+                                <tr><td>End</td><td></td><td>m n `+` x y `-` `/` z `+`</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-center font-bold">Final Postfix: `m n + x y - / z +`</p>
+
+                    <h4 class="text-xl font-bold mb-2 mt-8">Example 4: `(a^n)*(b-c/d*e)`</h4>
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-sm expression-table">
+                            <thead>
+                                <tr>
+                                    <th>Scanned Char</th>
+                                    <th>Stack</th>
+                                    <th>Postfix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>(</td><td>`(`</td><td></td></tr>
+                                <tr><td>a</td><td>`(`</td><td>a</td></tr>
+                                <tr><td>^</td><td>`^`, `(`</td><td>a</td></tr>
+                                <tr><td>n</td><td>`^`, `(`</td><td>a n</td></tr>
+                                <tr><td>)</td><td></td><td>a n `^`</td></tr>
+                                <tr><td>*</td><td>`*`</td><td>a n `^`</td></tr>
+                                <tr><td>(</td><td>`(` ` *`</td><td>a n `^`</td></tr>
+                                <tr><td>b</td><td>`(` ` *`</td><td>a n `^` b</td></tr>
+                                <tr><td>-</td><td>`-` `(` ` *`</td><td>a n `^` b</td></tr>
+                                <tr><td>c</td><td>`-` `(` ` *`</td><td>a n `^` b c</td></tr>
+                                <tr><td>/</td><td>`/` `-` `(` ` *`</td><td>a n `^` b c</td></tr>
+                                <tr><td>d</td><td>`/` `-` `(` ` *`</td><td>a n `^` b c d</td></tr>
+                                <tr><td>*</td><td>`*` `-` `(` ` *`</td><td>a n `^` b c d `/`</td></tr>
+                                <tr><td>e</td><td>`*` `-` `(` ` *`</td><td>a n `^` b c d `/` e</td></tr>
+                                <tr><td>)</td><td>`*`</td><td>a n `^` b c d `/` e `*` `-`</td></tr>
+                                <tr><td>End</td><td></td><td>a n `^` b c d `/` e `*` `-` `*`</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-center font-bold">Final Postfix: `a n ^ b c d / e * - *`</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-gray-300">
+
+        <section id="queue" class="mb-12">
+            <h2 class="text-4xl font-bold text-center mb-8 brand-text-red">Exploring Queues (FIFO)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                 <div class="card p-6 lg:col-span-2">
+                     <h3 class="text-2xl font-bold mb-4 text-center">Interactive Circular Queue Simulation</h3>
+                     <p class="text-center text-gray-600 mb-4">A queue is like a line at a ticket counter. The first person in line is the first to be served. A Circular Queue efficiently reuses space.</p>
+                     <div class="sim-container flex flex-col items-center justify-center gap-8 p-4 bg-gray-50 rounded-lg">
+                        <div class="w-full relative h-24">
+                            <div id="queue-visual-container" class="flex justify-around items-center h-16 bg-gray-200 p-2 rounded-full relative"></div>
+                             <div id="queue-front-pointer" class="absolute top-0 text-green-600 font-bold transition-all duration-500 text-center" style="left: -100px;">
+                                <span id="queue-front-value">-1</span><br>FRONT<br>▼
+                            </div>
+                             <div id="queue-rear-pointer" class="absolute bottom-0 text-blue-600 font-bold transition-all duration-500 text-center" style="left: -100px;">
+                                ▲<br>REAR<br><span id="queue-rear-value">-1</span>
+                            </div>
+                             <div id="queue-message" class="absolute inset-0 bg-opacity-80 text-white text-2xl font-bold flex items-center justify-center rounded-full opacity-0 transition-opacity pointer-events-none"></div>
+                        </div>
+                        <div class="w-full md:w-1/2 flex justify-center gap-4">
+                            <input type="number" id="queue-input" class="w-full p-2 border rounded-md" placeholder="Enter a number">
+                            <button id="queue-enqueue-btn" class="w-1/2 brand-bg-red text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">ENQUEUE</button>
+                            <button id="queue-dequeue-btn" class="w-1/2 brand-bg-yellow text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">DEQUEUE</button>
+                        </div>
+                        <div id="queue-dequeued-value" class="text-center font-semibold mt-2 h-6"></div>
+                     </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-2">Array Representation & ENQUEUE (Insert) Operation</h3>
+                    <p class="mb-4">Queues use two pointers: `front` (for removal) and `rear` (for insertion). `ENQUEUE` adds an element to the rear.</p>
+                    <div class="code-block">
+                        <pre><code>ENQUEUE(Q, val, F, R, SIZE):
+  // Check if Queue is full (Circular)
+  IF (R + 1) % SIZE == F:
+    PRINT "Queue Overflow"
+    RETURN
+  // Handle empty queue for first element
+  IF F == -1:
+    F = 0; R = 0
+  ELSE:
+    R = (R + 1) % SIZE // Move rear circularly
+  Q[R] = val</code></pre>
+                    </div>
+                </div>
+
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-2">DEQUEUE (Delete) Operation</h3>
+                    <p class="mb-4">`DEQUEUE` removes the element from the front of the queue. It also handles `Underflow`.</p>
+                    <div class="code-block">
+                        <pre><code>DEQUEUE(Q, F, R, SIZE):
+  // Check if Queue is empty
+  IF F == -1:
+    PRINT "Queue Underflow"
+    RETURN None
+  val = Q[F] // Retrieve front element
+  // If last element, reset queue
+  IF F == R:
+    F = -1; R = -1
+  ELSE:
+    F = (F + 1) % SIZE // Move front circularly
+  RETURN val</code></pre>
+                    </div>
+                </div>
+
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Limitations of Simple Queue (Linear Array)</h3>
+                    <p class="mb-4 text-gray-600">A simple linear array queue has a major drawback: even after `DEQUEUE` operations, the space at the beginning of the array is not reused. This leads to:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><b>Wasted Space:</b> The `front` pointer keeps advancing, leaving empty slots behind. The queue might report "full" even if there's physical space available at the start of the array.</li>
+                        <li><b>Inefficient Shifting:</b> To reuse space or maintain contiguity, elements might need to be shifted forward after a dequeue, which is an expensive O(N) operation.</li>
+                    </ul>
+                    <p class="mt-4 text-center text-gray-600">The <b>Circular Queue</b> solves this by wrapping around the array, allowing efficient reuse of space and constant time (O(1)) for both `ENQUEUE` and `DEQUEUE` operations.</p>
+                </div>
+
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Common Applications of Queues</h3>
+                    <div class="mt-4 text-gray-600">
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><b>CPU Scheduling:</b> Operating systems use queues to manage processes waiting for CPU time, ensuring fair allocation.</li>
+                            <li><b>Print Spooling:</b> Print jobs are queued and processed in the order they are received by a printer.</li>
+                            <li><b>Buffer Management:</b> Used in networking and operating systems to temporarily store data, handling differences in data production and consumption rates.</li>
+                            <li><b>Network Traffic Management:</b> Routers use queues to manage incoming and outgoing data packets, ensuring orderly transmission.</li>
+                            <li><b>Breadth-First Search (BFS):</b> A graph traversal algorithm that uses a queue to explore nodes level by level.</li>
+                            <li><b>Call Center Management:</b> Incoming calls are placed in a queue to be answered by agents in the order they arrive.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-t-2 border-gray-300">
+        
+        <section id="comparison" class="mb-12">
+            <h2 class="text-4xl font-bold text-center mb-8 brand-text-dark">Stack vs. Queue: The Showdown</h2>
+            <div class="card p-6 overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="brand-bg-dark text-white">
+                            <th class="p-3 font-bold text-lg">Feature</th>
+                            <th class="p-3 font-bold text-lg">Stack</th>
+                            <th class="p-3 font-bold text-lg">Queue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b">
+                            <td class="p-3 font-semibold">Principle</td>
+                            <td class="p-3">LIFO (Last-In, First-Out)</td>
+                            <td class="p-3">FIFO (First-In, First-Out)</td>
+                        </tr>
+                         <tr class="bg-gray-50 border-b">
+                            <td class="p-3 font-semibold">Analogy</td>
+                            <td class="p-3">A stack of plates 📚</td>
+                            <td class="p-3">A line of people 🎟️</td>
+                        </tr>
+                        <tr class="border-b">
+                            <td class="p-3 font-semibold">Pointers</td>
+                            <td class="p-3">One pointer: `top`</td>
+                            <td class="p-3">Two pointers: `front` and `rear`</td>
+                        </tr>
+                         <tr class="bg-gray-50 border-b">
+                            <td class="p-3 font-semibold">Insertion</td>
+                            <td class="p-3">`PUSH` at the `top`</td>
+                            <td class="p-3">`ENQUEUE` at the `rear`</td>
+                        </tr>
+                         <tr class="border-b">
+                            <td class="p-3 font-semibold">Deletion</td>
+                            <td class="p-3">`POP` from the `top`</td>
+                            <td class="p-3">`DEQUEUE` from the `front`</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="p-3 font-semibold">Key Use Case</td>
+                            <td class="p-3">Recursion, Expression Evaluation, Undo</td>
+                            <td class="p-3">Scheduling, Buffering, BFS Algorithm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card p-6 mt-8">
+                <h3 class="text-2xl font-bold mb-4 text-center">Differentiating Simple Queue and Circular Queue</h3>
+                <p class="mb-4 text-gray-600">The primary difference lies in how they manage available space and handle the `rear` pointer's movement:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li><b>Simple (Linear) Queue:</b> When `rear` reaches the end of the array, no more elements can be enqueued, even if `front` has moved far ahead, leaving empty spaces at the beginning. This leads to <b>wasted space</b> and potential "false full" conditions.</li>
+                    <li><b>Circular Queue:</b> `rear` wraps around to the beginning of the array if space is available there (i.e., `front` has moved past it). This allows for <b>efficient reuse of space</b> and ensures that the queue can utilize its full capacity. Both `ENQUEUE` and `DEQUEUE` operations are O(1) in a circular queue, unlike simple queues which might require O(N) for shifting elements.</li>
+                </ul>
+            </div>
+        </section>
+
+         <hr class="my-12 border-t-2 border-gray-300">
+
+        <section id="recursion" class="mb-12">
+            <h2 class="text-4xl font-bold text-center mb-8 brand-text-yellow">Recursion: The Stack in Action</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4">What is Recursion?</h3>
+                    <p class="mb-4">Recursion is a programming technique where a function calls itself to solve a problem. It breaks a big problem into smaller, identical sub-problems until it reaches a simple <b>base case</b> that can be solved directly.</p>
+                    <p>The magic behind recursion is the <b>call stack</b>. Every time a function calls itself, its information is `pushed` onto the call stack. When a function finishes, it's `popped` off. This LIFO behavior is perfect for keeping track of nested calls.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Visualizing Factorial(3)</h3>
+                    <div id="factorial-recursion-stack-container" class="flex flex-col-reverse items-center justify-start space-y-2 space-y-reverse bg-gray-100 p-4 rounded-lg min-h-[200px]">
+                        <div class="p-2 border-2 border-dashed border-gray-400 text-gray-400 w-4/5 text-center">Empty Call Stack</div>
+                    </div>
+                     <button id="factorial-recursion-start-btn" class="w-full mt-4 brand-bg-yellow text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">Animate Factorial(3)</button>
+                </div>
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center">Visualizing GCD(48, 18) Recursion</h3>
+                    <div id="gcd-recursion-stack-container" class="flex flex-col-reverse items-center justify-start space-y-2 space-y-reverse bg-gray-100 p-4 rounded-lg min-h-[200px]">
+                        <div class="p-2 border-2 border-dashed border-gray-400 text-gray-400 w-4/5 text-center">Empty Call Stack</div>
+                    </div>
+                     <button id="gcd-recursion-start-btn" class="w-full mt-4 brand-bg-yellow text-white p-3 rounded-lg font-bold shadow-md hover:opacity-90 transition-opacity">Animate GCD(48, 18)</button>
+                </div>
+                <div class="card p-6 lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4">Recursive Functions Examples</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="col-span-1">
+                            <h4 class="text-xl font-semibold brand-text-teal mb-2">1. Factorial</h4>
+                            <p class="mb-2">Calculates $n! = n \times (n-1) \times \dots \times 1$.</p>
+                            <div class="code-block">
+                                <pre><code>// C Program for Factorial
+#include &lt;stdio.h&gt;
+int factorial(int n) {
+    if (n == 0 || n == 1) {
+        return 1; // Base case
+    } else {
+        return n * factorial(n - 1); // Recursive case
+    }
+}
+int main() {
+    int num = 5;
+    printf("Factorial of %d is %d\n", num, factorial(num));
+    return 0;
+}</code></pre>
+                            </div>
+                        </div>
+                        <div class="col-span-1">
+                            <h4 class="text-xl font-semibold brand-text-red mb-2">2. Greatest Common Divisor (GCD)</h4>
+                            <p class="mb-2">Finds the largest positive integer that divides two numbers without a remainder (Euclidean Algorithm).</p>
+                            <div class="code-block">
+                                <pre><code>// C Program for GCD
+#include &lt;stdio.h&gt;
+int gcd(int a, int b) {
+    if (b == 0) {
+        return a; // Base case
+    } else {
+        return gcd(b, a % b); // Recursive case
+    }
+}
+int main() {
+    int num1 = 48, num2 = 18;
+    printf("GCD of %d and %d is %d\n", num1, num2, gcd(num1, num2));
+    return 0;
+}</code></pre>
+                            </div>
+                        </div>
+                        <div class="col-span-1">
+                            <h4 class="text-xl font-semibold brand-text-yellow mb-2">3. Fibonacci Series</h4>
+                            <p class="mb-2">Generates a sequence where each number is the sum of the two preceding ones (e.g., 0, 1, 1, 2, 3, 5...).</p>
+                            <div class="code-block">
+                                <pre><code>// C Program for Fibonacci
+#include &lt;stdio.h&gt;
+int fibonacci(int n) {
+    if (n <= 1) {
+        return n; // Base cases: fib(0)=0, fib(1)=1
+    } else {
+        return fibonacci(n - 1) + fibonacci(n - 2); // Recursive case
+    }
+}
+int main() {
+    int i;
+    printf("Fibonacci Series (first 7 terms):\n");
+    for (i = 0; i < 7; i++) {
+        printf("%d ", fibonacci(i));
+    }
+    return 0;
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <footer class="brand-bg-dark text-white p-6 mt-12 text-center">
+        <p>Created for educational purposes for Diploma Engineering Students.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const showMessage = (element, text, isError) => {
+                element.textContent = text;
+                element.style.backgroundColor = isError ? 'rgba(239, 91, 91, 0.8)' : 'rgba(0, 166, 166, 0.8)';
+                element.style.opacity = '1';
+                setTimeout(() => { element.style.opacity = '0'; }, 1500);
+            };
+
+            const stackContainer = document.getElementById('stack-visual-container');
+            const stackInput = document.getElementById('stack-input');
+            const stackPushBtn = document.getElementById('stack-push-btn');
+            const stackPopBtn = document.getElementById('stack-pop-btn');
+            const stackTopPointer = document.getElementById('stack-top-pointer');
+            const stackTopValue = document.getElementById('stack-top-value');
+            const stackPoppedValue = document.getElementById('stack-popped-value');
+            const stackMessage = document.getElementById('stack-message');
+            let stack = [];
+            const MAX_STACK_SIZE = 5;
+
+            function updateStackUI() {
+                stackContainer.innerHTML = '';
+                const itemHeight = stackContainer.clientHeight / MAX_STACK_SIZE;
+                stack.forEach((item) => {
+                    const el = document.createElement('div');
+                    el.className = 'stack-item w-full flex items-center justify-center font-bold text-white brand-bg-teal rounded-md border-2 border-white';
+                    el.style.height = `${itemHeight}px`;
+                    el.textContent = item;
+                    stackContainer.appendChild(el);
+                });
+                const topIndex = stack.length - 1;
+                stackTopValue.textContent = topIndex;
+                const pointerTopPosition = stackContainer.clientHeight - (stack.length * itemHeight);
+                stackTopPointer.style.top = `${pointerTopPosition - 16}px`;
+
+                stackPopBtn.disabled = stack.length === 0;
+                stackPopBtn.style.opacity = stack.length === 0 ? 0.5 : 1;
+                stackPushBtn.disabled = stack.length === MAX_STACK_SIZE;
+                stackPushBtn.style.opacity = stack.length === MAX_STACK_SIZE ? 0.5 : 1;
+            }
+
+            stackPushBtn.addEventListener('click', () => {
+                if (stack.length >= MAX_STACK_SIZE) {
+                    showMessage(stackMessage, 'Stack Overflow!', true);
+                    return;
+                }
+                const val = stackInput.value || Math.floor(Math.random() * 100);
+                if (val) {
+                    stack.push(val);
+                    stackInput.value = '';
+                    stackPoppedValue.textContent = '';
+                    updateStackUI();
+                }
+            });
+
+            stackPopBtn.addEventListener('click', () => {
+                if (stack.length === 0) {
+                    showMessage(stackMessage, 'Stack Underflow!', true);
+                    return;
+                }
+                const popped = stack.pop();
+                stackPoppedValue.textContent = `Popped: ${popped}`;
+                updateStackUI();
+            });
+            updateStackUI();
+            
+            const multiLineLabelTooltip = {
+                id: 'multiLineLabelTooltip',
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        return Array.isArray(label) ? label.join(' ') : label;
+                    }
+                }
+            };
+            
+            const processLabels = (labels) => {
+                return labels.map(label => {
+                    if (label.length > 16) {
+                        const words = label.split(' ');
+                        const lines = [];
+                        let currentLine = '';
+                        words.forEach(word => {
+                            if ((currentLine + word).length > 16) {
+                                lines.push(currentLine.trim());
+                                currentLine = '';
+                            }
+                            currentLine += word + ' ';
+                        });
+                        lines.push(currentLine.trim());
+                        return lines;
+                    }
+                    return label;
+                });
+            };
+
+            const stackAppsCtx = document.getElementById('stack-apps-chart').getContext('2d');
+            const originalLabels = ['Function Calls (Recursion)', 'Expression Evaluation', 'Undo Redo Operations', 'Browser History Navigation', 'Syntax Parsing'];
+            new Chart(stackAppsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: processLabels(originalLabels),
+                    datasets: [{
+                        label: 'Usage',
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: ['#00A6A6', '#75C9C8', '#F7B538', '#EF5B5B', '#2F4858'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: multiLineLabelTooltip
+                    }
+                }
+            });
+
+            const queueContainer = document.getElementById('queue-visual-container');
+            const queueInput = document.getElementById('queue-input');
+            const queueEnqueueBtn = document.getElementById('queue-enqueue-btn');
+            const queueDequeueBtn = document.getElementById('queue-dequeue-btn');
+            const queueFrontPointer = document.getElementById('queue-front-pointer');
+            const queueRearPointer = document.getElementById('queue-rear-pointer');
+            const queueFrontValue = document.getElementById('queue-front-value');
+            const queueRearValue = document.getElementById('queue-rear-value');
+            const queueDequeuedValue = document.getElementById('queue-dequeued-value');
+            const queueMessage = document.getElementById('queue-message');
+            const MAX_QUEUE_SIZE = 6;
+            let queue = new Array(MAX_QUEUE_SIZE).fill(null);
+            let front = -1, rear = -1;
+
+            function updateQueueUI() {
+                queueContainer.innerHTML = '';
+                const cellWidth = 100 / MAX_QUEUE_SIZE;
+                for(let i=0; i<MAX_QUEUE_SIZE; i++){
+                    const el = document.createElement('div');
+                    el.style.width = `${cellWidth}%`;
+                    el.className = 'queue-item h-full flex items-center justify-center font-bold border-2 border-white rounded-md';
+                    if(queue[i] !== null){
+                         el.textContent = queue[i];
+                         el.classList.add('brand-bg-red', 'text-white');
+                    } else {
+                        el.classList.add('bg-gray-300');
+                    }
+                    queueContainer.appendChild(el);
+                }
+                
+                queueFrontValue.textContent = front;
+                queueRearValue.textContent = rear;
+
+                if(front === -1) {
+                    queueFrontPointer.style.left = `-100px`;
+                    queueRearPointer.style.left = `-100px`;
+                } else {
+                    const frontPos = (front * cellWidth) + (cellWidth / 2);
+                    queueFrontPointer.style.left = `calc(${frontPos}% - 20px)`;
+
+                    const rearPos = (rear * cellWidth) + (cellWidth / 2);
+                    queueRearPointer.style.left = `calc(${rearPos}% - 20px)`;
+                }
+
+                const isFull = (rear + 1) % MAX_QUEUE_SIZE === front;
+                const isEmpty = front === -1;
+                queueEnqueueBtn.disabled = isFull;
+                queueEnqueueBtn.style.opacity = isFull ? 0.5 : 1;
+                queueDequeueBtn.disabled = isEmpty;
+                queueDequeueBtn.style.opacity = isEmpty ? 0.5 : 1;
+            }
+
+            queueEnqueueBtn.addEventListener('click', () => {
+                const isFull = (rear + 1) % MAX_QUEUE_SIZE === front;
+                if(isFull) {
+                    showMessage(queueMessage, 'Queue Overflow!', true);
+                    return;
+                }
+                const val = queueInput.value || Math.floor(Math.random() * 100);
+                if (val) {
+                    if(front === -1) {
+                        front = 0;
+                        rear = 0;
+                    } else {
+                        rear = (rear + 1) % MAX_QUEUE_SIZE;
+                    }
+                    queue[rear] = val;
+                    queueInput.value = '';
+                    queueDequeuedValue.textContent = '';
+                    updateQueueUI();
+                }
+            });
+
+            queueDequeueBtn.addEventListener('click', () => {
+                if(front === -1) {
+                    showMessage(queueMessage, 'Queue Underflow!', true);
+                    return;
+                }
+                let dequeued = queue[front];
+                queue[front] = null;
+                queueDequeuedValue.textContent = `Dequeued: ${dequeued}`;
+                if(front === rear){
+                    front = -1;
+                    rear = -1;
+                } else {
+                    front = (front + 1) % MAX_QUEUE_SIZE;
+                }
+                updateQueueUI();
+            });
+
+            updateQueueUI();
+
+            const factorialRecursionStackContainer = document.getElementById('factorial-recursion-stack-container');
+            const factorialRecursionStartBtn = document.getElementById('factorial-recursion-start-btn');
+
+            factorialRecursionStartBtn.addEventListener('click', () => {
+                factorialRecursionStartBtn.disabled = true;
+                factorialRecursionStartBtn.style.opacity = 0.5;
+                factorialRecursionStackContainer.innerHTML = '';
+                const steps = [
+                    { action: 'push', text: 'factorial(3)' },
+                    { action: 'push', text: 'factorial(2)', delay: 1200 },
+                    { action: 'push', text: 'factorial(1)', delay: 1200 },
+                    { action: 'base', text: 'Base Case! Return 1', delay: 1200 },
+                    { action: 'pop', text: 'factorial(1) returns 1', result: '2 * 1 = 2', delay: 1500 },
+                    { action: 'pop', text: 'factorial(2) returns 2', result: '3 * 2 = 6', delay: 2000 },
+                    { action: 'pop', text: 'factorial(3) returns 6', result: 'Final Answer: 6', delay: 2000 },
+                ];
+                let cumulativeDelay = 0;
+
+                steps.forEach((step, index) => {
+                    cumulativeDelay += step.delay || 0;
+                    setTimeout(() => {
+                        if (step.action === 'push') {
+                            const el = document.createElement('div');
+                            el.className = 'recursion-frame p-3 brand-bg-yellow text-white w-4/5 text-center rounded-lg shadow-lg transform scale-0';
+                            el.textContent = step.text;
+                            factorialRecursionStackContainer.prepend(el);
+                            setTimeout(() => el.classList.add('scale-100'), 50);
+                        } else if (step.action === 'pop') {
+                           const topEl = factorialRecursionStackContainer.firstChild;
+                           if (topEl) {
+                               topEl.classList.remove('scale-100');
+                               topEl.classList.add('scale-0');
+                               setTimeout(() => topEl.remove(), 500);
+                           }
+                           if(factorialRecursionStackContainer.children.length > 1){
+                               const nextEl = factorialRecursionStackContainer.children[1];
+                               if(nextEl) {
+                                   nextEl.classList.add('brand-bg-light-teal', 'brand-text-dark');
+                                   nextEl.textContent = `${nextEl.textContent.split(' ')[0]} gets result... calculating ${step.result}`;
+                               }
+                           }
+                        } else if (step.action === 'base'){
+                            const topEl = factorialRecursionStackContainer.firstChild;
+                            if(topEl){
+                               topEl.classList.replace('brand-bg-yellow', 'brand-bg-teal');
+                               topEl.textContent = step.text;
+                            }
+                        }
+
+                        if (index === steps.length - 1) {
+                            setTimeout(() => {
+                                factorialRecursionStackContainer.innerHTML = '<div class="p-2 border-2 border-dashed border-gray-400 text-gray-400 w-4/5 text-center">Empty Call Stack</div>';
+                                factorialRecursionStartBtn.disabled = false;
+                                factorialRecursionStartBtn.style.opacity = 1;
+                            }, 1500);
+                        }
+                    }, cumulativeDelay);
+                });
+            });
+
+            const gcdRecursionStackContainer = document.getElementById('gcd-recursion-stack-container');
+            const gcdRecursionStartBtn = document.getElementById('gcd-recursion-start-btn');
+
+            gcdRecursionStartBtn.addEventListener('click', () => {
+                gcdRecursionStartBtn.disabled = true;
+                gcdRecursionStartBtn.style.opacity = 0.5;
+                gcdRecursionStackContainer.innerHTML = '';
+                const steps = [
+                    { action: 'push', text: 'gcd(48, 18)' },
+                    { action: 'push', text: 'gcd(18, 12)', delay: 1200 }, // 48 % 18 = 12
+                    { action: 'push', text: 'gcd(12, 6)', delay: 1200 },  // 18 % 12 = 6
+                    { action: 'push', text: 'gcd(6, 0)', delay: 1200 },   // 12 % 6 = 0
+                    { action: 'base', text: 'Base Case! Return 6', delay: 1200 },
+                    { action: 'pop', text: 'gcd(6, 0) returns 6', result: '6', delay: 1500 },
+                    { action: 'pop', text: 'gcd(12, 6) returns 6', result: '6', delay: 2000 },
+                    { action: 'pop', text: 'gcd(18, 12) returns 6', result: '6', delay: 2000 },
+                    { action: 'pop', text: 'gcd(48, 18) returns 6', result: 'Final Answer: 6', delay: 2000 },
+                ];
+                let cumulativeDelay = 0;
+
+                steps.forEach((step, index) => {
+                    cumulativeDelay += step.delay || 0;
+                    setTimeout(() => {
+                        if (step.action === 'push') {
+                            const el = document.createElement('div');
+                            el.className = 'recursion-frame p-3 brand-bg-yellow text-white w-4/5 text-center rounded-lg shadow-lg transform scale-0';
+                            el.textContent = step.text;
+                            gcdRecursionStackContainer.prepend(el);
+                            setTimeout(() => el.classList.add('scale-100'), 50);
+                        } else if (step.action === 'pop') {
+                           const topEl = gcdRecursionStackContainer.firstChild;
+                           if (topEl) {
+                               topEl.classList.remove('scale-100');
+                               topEl.classList.add('scale-0');
+                               setTimeout(() => topEl.remove(), 500);
+                           }
+                           if(gcdRecursionStackContainer.children.length > 1){
+                               const nextEl = gcdRecursionStackContainer.children[1];
+                               if(nextEl) {
+                                   nextEl.classList.add('brand-bg-light-teal', 'brand-text-dark');
+                                   nextEl.textContent = `${nextEl.textContent.split(' ')[0]} gets result... calculating ${step.result}`;
+                               }
+                           }
+                        } else if (step.action === 'base'){
+                            const topEl = gcdRecursionStackContainer.firstChild;
+                            if(topEl){
+                               topEl.classList.replace('brand-bg-yellow', 'brand-bg-teal');
+                               topEl.textContent = step.text;
+                            }
+                        }
+
+                        if (index === steps.length - 1) {
+                            setTimeout(() => {
+                                gcdRecursionStackContainer.innerHTML = '<div class="p-2 border-2 border-dashed border-gray-400 text-gray-400 w-4/5 text-center">Empty Call Stack</div>';
+                                gcdRecursionStartBtn.disabled = false;
+                                gcdRecursionStartBtn.style.opacity = 1;
+                            }, 1500);
+                        }
+                    }, cumulativeDelay);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
